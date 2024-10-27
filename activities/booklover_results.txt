@@ -1,0 +1,16 @@
+Python 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license()" for more information.
+
+=================== RESTART: C:\Users\Hall\booklover_test.py ===================
+test_1_add_book (__main__.BookLoverTestSuite) ... ok
+test_2_add_book (__main__.BookLoverTestSuite) ... Error: This book is already in your book list!
+ok
+test_3_has_read (__main__.BookLoverTestSuite) ... ok
+test_4_has_read (__main__.BookLoverTestSuite) ... ok
+test_5_num_books_read (__main__.BookLoverTestSuite) ... ok
+test_6_fav_books (__main__.BookLoverTestSuite) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.034s
+
+OK
