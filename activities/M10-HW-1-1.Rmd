@@ -1,0 +1,230 @@
+---
+editor_options:
+  markdown:
+    wrap: 72
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+# Metadata
+
+    Course:  DS 5100
+    Module:  10 R Programming 1
+    Topic:   HW Computing Payoff for a Quota Structure
+    Author:  R.C. Alvarado (adapted)
+    Date:    7 July (revised)
+
+# Student Info
+
+    Name: Sarah Hall    
+    Ned ID: CEJ2VH
+    URL of this file on GitHub:
+
+# Instructions
+
+In your **private course repo** use this notebook to write code that
+performs the tasks below.
+
+Save your notebook in the `M10` directory.
+
+Remember to add and commit these files to your repo.
+
+Then push your commits to your repo on GitHib.
+
+Be sure to fill out the **Student Info** block above.
+
+To submit your homework, save your results as a PDF and upload it to
+GradeScope.
+
+**TOTAL POINTS: 12**
+
+------------------------------------------------------------------------
+
+# Overview
+
+A salesperson at a large tech firm is faced with a new payment
+structure.
+
+This salesperson has a quarterly quota of \$225,000.
+
+The payment received follows a progressive schedule with four brackets
+as follows:
+
+1.  For the first 40% of quota, the salesperson receives 7% on quota
+    reached
+2.  For the next 30% of quota, the salesperson receives 10% on quota
+    reached
+3.  For the next 20% of quota, the salesperson receives 13% on quota
+    reached
+4.  For the next 10% of quota, the salesperson receives 16% on quota
+    reached
+
+For example, if the salesperson is 50% to quota, reaching \$112,500 of
+sales, then:
+
+-   `a` = the first 40% is paid out at 7%, thus payout = \$225,000 \*
+    40% \* 7%
+-   `b` = the next 10% is paid out at 10%, thus payout = \$225,000 \*
+    10% \* 10%
+
+The total payout to the salesperson would be `a + b`.
+
+Notice what does *not* happen: getting to the second bracket does NOT
+mean the payout is \$225,000 \* 50% \* 10%.
+
+In another example, a salesperson is at 20% quota. Their payout would be
+\$225,000 \* 20% \* 7%.
+
+This schedule represents earnings up to 100% of quota. We ignore sales
+above 100% here.
+
+**Given this, the salesperson would like to know how much she would earn
+if she reaches a given percentage of quarterly quota.**
+
+Note: The quota structure in this assignment is analogous to how the US
+tax system works: There are several **brackets** with rate $r$ applied
+to dollars in bracket $i$.
+
+------------------------------------------------------------------------
+
+# Task 1
+
+(4 points)
+
+Create a dataframe that encodes the information presented in the
+question. That is, assume that each row of the dataframe stands for a
+bracket, and that the columns stand for the features described in the
+progressive schedule. Then, using the quarterly quota of \$225,000, add
+columns to the dataframe that apply the encoded parameters to this value
+for each bracket. You should end up with columns for the earnings in
+dollars for each bracket, as well as the payout in dollars.
+
+```{r}
+# Created a bunch of vars in case they are needed
+#Min and Max range represent range of values for % of quota for that payout rate
+#prog_ vars show increasing #s for quota and payout for each successive bracket
+
+quote_pct_min<-c(0.00,0.41,0.71,0.91)
+quote_pct_max<-c(0.40,0.70,0.90,1.00)
+quota_rate<-c(0.4,0.3,0.2,0.1)
+payout_rate<-c(0.07,0.1,0.13,0.16)
+payout_bracket<-data.frame(quote_pct_min,quote_pct_max,quota_rate, payout_rate)
+payout_bracket$bracket_amt<-225000*payout_bracket$quota_rate
+payout_bracket$payout_amt<-225000*payout_bracket$quota_rate*payout_bracket$payout_rate
+payout_bracket$prog_bracket <- cumsum(payout_bracket$bracket_amt)
+payout_bracket$prog_payout_amt <-cumsum(payout_bracket$payout_amt)
+payout_bracket
+```
+
+# Task 2
+
+(4 points)
+
+Write a function that takes an argument for the fraction of quarterly
+quota reached by the salesperson, expressed as a decimal value between
+$0$ and $1$ (e.g. $0.8$ means $80\%$), and which returns the dollar
+amount earned.
+
+This function should use the previously defined dataframe as a global
+variable. Note that this function is greatly simplified if your first
+dataframe has cumulative sums for the dollar amount columns.
+
+**Do not use for loops in completing this task or the next. Instead, let your
+dataframe do the work.** In your function, match the amount earned to
+the appropriate row in your first dataframe to get the answer.
+
+```{r}
+# CODE HERE
+payout <- function(pct) {
+  #We need to get earnings as the dollar amount
+  earnings <-225000 * pct
+  #Case for when 40% or less of bracket was reached
+  if (earnings <= payout_bracket[1,5]) {
+        earnings * payout_bracket[1,4]}
+  #Case when quota is met. Only going to 225k because the problem specifies a max of 100%
+  #So we just need the value of $22,500
+  else if (earnings >= payout_bracket[4,7])  {
+        payout_bracket[4,8]} 
+  #Final case needs to find what range the pct is in, get the current rate
+  else {
+        #Get index of current rate
+        curr_index<-which(payout_bracket$quote_pct_min <=pct & payout_bracket$quote_pct_max >=pct)
+        
+        #Get rate of current bracket
+        curr_rate<-payout_bracket[payout_bracket$quote_pct_min <=pct & payout_bracket$quote_pct_max >=pct,4]
+        
+        #Get cumulative award up to the PREVIOUS bracket, since it's not total for our current bracket
+        prev_calc_payout<-payout_bracket[curr_index-1,8]
+        
+        #Get cumulative bracket price up to PREV bracket, since we need to know how much has already been calculated
+        prev_calc_prgbkt<-payout_bracket[curr_index-1,7]
+        
+        prev_calc_payout+(curr_rate*(earnings-prev_calc_prgbkt))}
+
+}
+#testing on someone getting 66% of their 225k quota
+payout(.7)
+
+```
+
+# Task 3
+
+(2 points)
+
+Call the function to get the dollar amount earned in increments
+of $10\%$ in a range between $0\%$ to $100\%$ earned. Note that you can
+use `seq()` to generate these increments.
+
+Be sure to put the results of your function at work into a second
+dataframe. That is, create a dataframe with columns for percent of quota
+earned and payout for that amount.
+
+
+
+
+...
+
+```{r}
+# Ran into an issue with ONLY .7 when using seq() to pass the increments, hard coding instead
+#payrates<-seq(from=0.1, to=1, by=0.1)
+payrates2 <-c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)
+
+graph_data<-data.frame(payrates2)
+
+graph_data$increment_ern <-apply(X=graph_data[1],MARGIN=1,FUN=payout)
+graph_data
+```
+
+# Task 4
+
+(1 point)
+
+Using the first dataframe, plot the amounts earned (y-axis) versus quarterly quota reached (x-axis). 
+
+Display the graph using both points and lines.
+
+Hint: for both axes, use the cumulative sums, which you should have
+defined above.
+
+```{r}
+# CODE HERE
+plot(payout_bracket[, c("quote_pct_max", "prog_bracket")],xlab="% of Quota",ylab="Quota Reached (in $)",main="Amount of Quota Reached")
+lines(payout_bracket$quote_pct_max, payout_bracket$prog_bracket, col="red")
+
+```
+# Task 5 
+
+(1 point)
+
+Using the second dataframe, plot the dollar amount for each increment (x-axis) versus the payout in dollars (y-axis). 
+
+Again, display the graph using both points and lines.
+
+```{r}
+#adding a column that shows the % of 225k at each of the 10% increments
+graph_data$increment_quota <-graph_data$payrates*225000
+plot(graph_data[, c("increment_quota", "increment_ern")],xlab="Quota Reached(in $)",ylab="Payout Reached (in $)",main="Amount of Quota Reached")
+lines(graph_data$increment_quota, graph_data$increment_ern, col="red")
+```
