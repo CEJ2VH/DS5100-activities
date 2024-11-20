@@ -1,0 +1,130 @@
+---
+title: "Mod 11 Participation"
+author: "Sarah Hall"
+date: "2024-11-20"
+output:
+  html_document: default
+  pdf_document: default
+---
+install/load tidyverse
+add scores tibble
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(tidyverse)
+scores <- 
+  tibble(
+    name = c("mike", "carol", "greg", "marcia", "peter", "jan", "bobby", "cindy", "alice"),
+    school = c("south", "south", "south", "south", "north", "north", "north", "south", "south"),
+    teacher = c("johnson", "johnson", "johnson", "johnson",  "smith", "smith", "smith", "perry", "perry"),
+    sex = c("male", "female", "male", "female", "male", "female", "male", "female", "female"),
+    math_score = c(4, 3, 2, 4, 3, 4, 5, 4, 5),
+    reading_score = c(1, 5, 2, 4, 5, 4, 1, 5, 4)
+)
+```
+
+view tibble
+
+```{r}
+scores
+print(scores)
+```
+use slice for first 3 rows
+```{r}
+scores %>% 
+  slice(1:3)
+```
+
+```{r}
+scores3 <- scores %>% 
+  slice(1:3)
+```
+
+```{r}
+scores %>% 
+  arrange(desc(math_score))
+```
+```{r}
+scores %>% 
+  arrange(name)
+```
+```{r}
+scores %>% 
+  arrange(school, teacher, sex, math_score, reading_score)
+```
+```{r}
+scores %>% 
+  dplyr::select(-sex)
+```
+```{r}
+scores %>% 
+  dplyr::select(-sex, -reading_score)
+```
+
+```{r}
+scores %>% dplyr::select(sex,everything())
+```
+
+```{r}
+scores %>% dplyr::filter(sex=='male',school=='south',na.rm=TRUE)
+```
+```{r}
+scores %>% dplyr::filter(math_score>mean(math_score, na.rm=TRUE))
+```
+```{r}
+scores %>% dplyr::filter(math_score>3, reading_score>2)
+```
+
+```{r}
+scores %>% dplyr::filter(math_score<4 |reading_score<4)
+```
+```{r}
+scores %>% dplyr::filter(math_score<5 ,math_score>1)
+```
+
+```{r}
+scores %>% dplyr::filter(substr(name,1,1)=='m')
+```
+
+```{r}
+#scores %>% 
+  #group_by(teacher)%>% 
+  #dplyr::filter(max(math_score)) 
+```
+
+```{r}
+scores %>% 
+  group_by(sex) %>% 
+  dplyr::filter(mean(math_score)==4)
+```
+```{r}
+scores %>% 
+  mutate(math_score=math_score*10) %>% 
+  mutate(reading_score=reading_score*10)
+```
+```{r}
+scores %>% 
+  mutate(math_reading_score=(math_score+reading_score)/2) 
+
+```
+
+```{r}
+scores %>% 
+  mutate(high_math=math_score>3)
+```
+
+```{r}
+scores %>% 
+  mutate(reading_score_centered=reading_score-mean(reading_score))
+```
+```{r}
+scores %>% 
+  group_by(sex) %>% 
+  mutate(math_score_centered=math_score-mean(math_score)) %>% 
+  arrange(desc(math_score_centered))
+```
+```{r}
+scores
+```
+
